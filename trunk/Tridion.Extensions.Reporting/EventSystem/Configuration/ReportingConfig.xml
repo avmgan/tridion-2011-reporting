@@ -20,6 +20,6 @@
     <Event Type="GetInstanceDataEventArgs" Enabled="true"/>
   </Events>
   <LogInfoObject>
-    <add assembly="N:\Development\Gamification\TrackEverythingEventSystem\Logging\bin\Debug\Logging.dll" class="Logging.ExtendedLogInfo" subjectType="Publication" />
+    <add assembly="N:\Development\Gamification\TrackEverythingEventSystem\Logging\bin\Debug\Logging.dll" class="Logging.ExtendedLogInfo" subjectType="Publication" default="true" />
   </LogInfoObject>
 </Configuration>
