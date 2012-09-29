@@ -10,8 +10,6 @@ using Tridion.ContentManager.ContentManagement;
 using Tridion.ContentManager.Extensibility;
 using Tridion.ContentManager.Extensibility.Events;
 
-using Tridion.Extensions.Reporting.EventSystem;
-
 namespace Tridion.Extensions.Reporting.EventSystem
 {
     [TcmExtension("TrackEverythingEvents")]
@@ -21,6 +19,8 @@ namespace Tridion.Extensions.Reporting.EventSystem
         private static string _mongoConnectionString = "mongodb://localhost/?safe=true";
         private readonly List<EventSubscription> _subscriptions = new List<EventSubscription>();
         private AuditClient _client;
+        //private BasicHttpBinding _binding;
+        //private EndpointAddress _endpoint;
 
         public TrackEverything()
         {
@@ -32,6 +32,10 @@ namespace Tridion.Extensions.Reporting.EventSystem
             _subscriptions.Add(EventSystem.Subscribe<IdentifiableObject, TcmEventArgs>(LogStart, EventPhases.Initiated));
             _subscriptions.Add(EventSystem.SubscribeAsync<IdentifiableObject, TcmEventArgs>(CollectEvent, EventPhases.TransactionCommitted | EventPhases.TransactionAborted | EventPhases.TransactionInDoubt));
 
+            // Open client
+            //_binding = new BasicHttpBinding(BasicHttpSecurityMode.None);
+            //_endpoint = new EndpointAddress("http://localhost:49267/Audit.svc");
+            //_client = new AuditClient(_binding, _endpoint);
             _client = new AuditClient();
         }
 
