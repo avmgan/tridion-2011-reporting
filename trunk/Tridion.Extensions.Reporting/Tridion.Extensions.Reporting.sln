@@ -5,8 +5,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Logging", "Logging\Logging.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventSystem", "EventSystem\EventSystem.csproj", "{682051D9-2F62-4E64-BCF1-A64FF7E05683}"
 EndProject
+<<<<<<< .mine
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Storage", "Storage\Storage.csproj", "{4E9A0F3F-C884-4AFF-B785-D7196BA1511E}"
+EndProject
+=======
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gamification", "Gamification\Gamification.csproj", "{2823FE91-9A29-402D-8E15-B8BB0F5EC39C}"
 EndProject
+>>>>>>> .r6
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,10 +26,17 @@ Global
 		{682051D9-2F62-4E64-BCF1-A64FF7E05683}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{682051D9-2F62-4E64-BCF1-A64FF7E05683}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{682051D9-2F62-4E64-BCF1-A64FF7E05683}.Release|Any CPU.Build.0 = Release|Any CPU
+<<<<<<< .mine
+		{4E9A0F3F-C884-4AFF-B785-D7196BA1511E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4E9A0F3F-C884-4AFF-B785-D7196BA1511E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4E9A0F3F-C884-4AFF-B785-D7196BA1511E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4E9A0F3F-C884-4AFF-B785-D7196BA1511E}.Release|Any CPU.Build.0 = Release|Any CPU
+=======
 		{2823FE91-9A29-402D-8E15-B8BB0F5EC39C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{2823FE91-9A29-402D-8E15-B8BB0F5EC39C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2823FE91-9A29-402D-8E15-B8BB0F5EC39C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2823FE91-9A29-402D-8E15-B8BB0F5EC39C}.Release|Any CPU.Build.0 = Release|Any CPU
+>>>>>>> .r6
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
