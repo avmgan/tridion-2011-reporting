@@ -17,10 +17,10 @@ namespace Gamification
         {
             List<Badge> badges = new List<Badge>();
 
-            if (File.Exists("Badges.xml"))
+            if (File.Exists("Configuration\\Badges.xml"))
             {
                 XmlDocument badgesConfig = new XmlDocument();
-                badgesConfig.Load("Badges.xml");
+                badgesConfig.Load("Configuration\\Badges.xml");
                 foreach (XmlNode r in badgesConfig.SelectNodes("/Badges"))
                 {
                     foreach (XmlNode node in r.ChildNodes)

@@ -17,10 +17,10 @@ namespace Gamification
         {
             List<Challenge> challenges = new List<Challenge>();
 
-            if (File.Exists("Challenges.xml"))
+            if (File.Exists("Configuration\\Challenges.xml"))
             {
                 XmlDocument challengesConfig = new XmlDocument();
-                challengesConfig.Load("Challenges.xml");
+                challengesConfig.Load("Configuration\\Challenges.xml");
                 foreach (XmlNode c in challengesConfig.SelectNodes("/Challenges"))
                 {
                     foreach (XmlNode node in c.ChildNodes)
