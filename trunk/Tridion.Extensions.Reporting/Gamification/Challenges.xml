@@ -1,5 +1,0 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
-<Challenges>
-  <Challenge id="1" badgesToComplete="1,2" title="Basic Training Complete!" description="You have published a page to the site" message="Graduated with honors!" />
-  <Challenge id="2" badgesToComplete="3,4" title="Medium Training Complete!" description="You have published a page to the site" message="Graduated with first class honors!" />
-</Challenges>

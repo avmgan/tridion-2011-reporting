@@ -1,7 +1,0 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
-<Badges>
-  <Badge id="1" eventFamily="Publish" eventPhase="PublishSuccess" operator="Equals" maxValue="1" minValue="1" title="First Post" 
-        description="You have published you first piece of content" message="It's Alive!" objectType="Page" />
-  <Badge id="2" eventFamily="Publish" eventPhase="ObjectCreated" operator="Equals" maxValue="1" minValue="1" title="Page Creator" 
-        description="You have created your first page" message="Hello World!?" objectType="Page" />
-</Badges>
