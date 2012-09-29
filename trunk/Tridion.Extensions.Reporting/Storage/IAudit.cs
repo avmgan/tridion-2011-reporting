@@ -7,7 +7,7 @@ namespace Tridion.Extensions.Reporting.Storage
     public interface IAudit
     {
         [OperationContract(IsOneWay = true)]
-        void WriteEvent(string eventData);
+        void WriteEvent(object eventData);
 
         // TODO: Add your service operations here
     }

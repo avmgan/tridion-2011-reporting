@@ -13,31 +13,15 @@ namespace Tridion.Extensions.Reporting.Storage
     {
         private const string MongoDbConnnectionString = "mongodb://localhost/?safe=true";
 
-        public void WriteEvent(string eventData)
+        public void WriteEvent(object eventData)
         {
-            XmlDocument document = new XmlDocument();
-            document.LoadXml(eventData);
-
             MongoServer server = MongoServer.Create(MongoDbConnnectionString);
             MongoDatabase tridionEventDatabase = server.GetDatabase("TridionEvents");
             using (server.RequestStart(tridionEventDatabase))
             {
                
                 var collection = tridionEventDatabase.GetCollection<BsonDocument>("events");
-                BsonDocument doc = new BsonDocument();
-                foreach (XmlElement element in document.DocumentElement.ChildNodes)
-                {
-                    if(element.Name != "EventStartDate")
-                    {
-                        doc.Add(element.Name, element.InnerText);
-                    }
-                    else
-                    {
-                        doc.Add(element.Name, DateTime.Now);
-                    }
-                }
-                    
-                collection.Insert(doc);
+                collection.Insert(eventData.ToBsonDocument());
             }
 
             server.Disconnect();
