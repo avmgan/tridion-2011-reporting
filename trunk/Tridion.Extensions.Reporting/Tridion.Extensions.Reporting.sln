@@ -1,15 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
+# Visual Studio 2010
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Logging", "Logging\Logging.csproj", "{502F4E5B-FCDA-439F-AD6C-122D3BEDFBD0}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventSystem", "EventSystem\EventSystem.csproj", "{682051D9-2F62-4E64-BCF1-A64FF7E05683}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Gamification", "Gamification\Gamification.csproj", "{2823FE91-9A29-402D-8E15-B8BB0F5EC39C}"
+EndProject
 Global
-	GlobalSection(SubversionScc) = preSolution
-		Svn-Managed = True
-		Manager = AnkhSVN - Subversion Support for Visual Studio
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
@@ -23,8 +21,16 @@ Global
 		{682051D9-2F62-4E64-BCF1-A64FF7E05683}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{682051D9-2F62-4E64-BCF1-A64FF7E05683}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{682051D9-2F62-4E64-BCF1-A64FF7E05683}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2823FE91-9A29-402D-8E15-B8BB0F5EC39C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2823FE91-9A29-402D-8E15-B8BB0F5EC39C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2823FE91-9A29-402D-8E15-B8BB0F5EC39C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2823FE91-9A29-402D-8E15-B8BB0F5EC39C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(SubversionScc) = preSolution
+		Svn-Managed = True
+		Manager = AnkhSVN - Subversion Support for Visual Studio
 	EndGlobalSection
 EndGlobal
