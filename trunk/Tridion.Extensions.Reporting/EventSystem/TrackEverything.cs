@@ -2,12 +2,15 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.ServiceModel;
 using System.Xml;
 
 using Tridion.ContentManager;
 using Tridion.ContentManager.ContentManagement;
 using Tridion.ContentManager.Extensibility;
 using Tridion.ContentManager.Extensibility.Events;
+
+using Tridion.Extensions.Reporting.EventSystem;
 
 namespace Tridion.Extensions.Reporting.EventSystem
 {
@@ -17,6 +20,7 @@ namespace Tridion.Extensions.Reporting.EventSystem
 
         private static string _mongoConnectionString = "mongodb://localhost/?safe=true";
         private readonly List<EventSubscription> _subscriptions = new List<EventSubscription>();
+        private AuditClient _client;
 
         public TrackEverything()
         {
@@ -27,6 +31,8 @@ namespace Tridion.Extensions.Reporting.EventSystem
         {
             _subscriptions.Add(EventSystem.Subscribe<IdentifiableObject, TcmEventArgs>(LogStart, EventPhases.Initiated));
             _subscriptions.Add(EventSystem.SubscribeAsync<IdentifiableObject, TcmEventArgs>(CollectEvent, EventPhases.TransactionCommitted | EventPhases.TransactionAborted | EventPhases.TransactionInDoubt));
+
+            _client = new AuditClient();
         }
 
 
@@ -49,7 +55,7 @@ namespace Tridion.Extensions.Reporting.EventSystem
             tcmEventArgs.ContextVariables.Add("InitiatedTicks", DateTime.Now.Ticks);
         }
 
-        private static void CollectEvent(IdentifiableObject subject, TcmEventArgs tcmEventArgs, EventPhases phase)
+        private void CollectEvent(IdentifiableObject subject, TcmEventArgs tcmEventArgs, EventPhases phase)
         {
 
             string eventName = tcmEventArgs.GetType().Name;
@@ -95,35 +101,34 @@ namespace Tridion.Extensions.Reporting.EventSystem
 
             long startTime = Convert.ToInt64(tcmEventArgs.ContextVariables["InitiatedTicks"]);
 
-            MongoServer server = MongoServer.Create(_mongoConnectionString);
+            var logInfo = new object();
 
-            MongoDatabase tridionEventDatabase = server.GetDatabase("TridionEvents");
-
-            using (server.RequestStart(tridionEventDatabase))
+            if (assemblyLocation != string.Empty && logInfoObjectClass != string.Empty)
             {
-                var collection = tridionEventDatabase.GetCollection<BsonDocument>("events");
+                Assembly logInfoAssembly = Assembly.LoadFile(assemblyLocation);
+                Type logInfoType = logInfoAssembly.GetType("Logging.ExtendedLogInfo");
+                logInfo = Activator.CreateInstance(logInfoType,
+                                                    new object[] { startTime, subject, tcmEventArgs, phase });
 
-                var logInfo = new object();
-
-                if (assemblyLocation != string.Empty && logInfoObjectClass != string.Empty)
-                {
-                    Assembly logInfoAssembly = Assembly.LoadFile(assemblyLocation);
-                    Type logInfoType = logInfoAssembly.GetType("Logging.ExtendedLogInfo");
-                    logInfo = Activator.CreateInstance(logInfoType,
-                                                       new object[] { startTime, subject, tcmEventArgs, phase });
-                }
-                else
-                {
-                    logInfo = new BaseLogInfo(startTime, subject, tcmEventArgs, phase);
-                }
-
-                BsonDocument logInfoDoc = logInfo.ToBsonDocument();
-
-                collection.Insert(logInfoDoc);
+                StoreAuditData(logInfo);
             }
+        }
 
-            server.Disconnect();
+        private void StoreAuditData(object auditData)
+        {
+            if (_client.State == CommunicationState.Opened)
+                _client.WriteEvent(auditData);
+            if (_client.State != CommunicationState.Opened)
+            {
+                if (_client.State != CommunicationState.Faulted)
+                    _client.Close();
+                else
+                    _client.Abort();
 
+                //_client = new AuditClient(_binding, _endpoint);
+                _client = new AuditClient();
+                _client.Open();
+            }
         }
 
         public void Dispose()
