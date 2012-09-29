@@ -6,7 +6,7 @@ using System.Xml.Serialization;
 using System.IO;
 using System.Xml;
 
-namespace Gamification
+namespace Tridion.Extensions.Reporting.Gamification
 {
     [Serializable]
     [XmlRoot("Challenge")]

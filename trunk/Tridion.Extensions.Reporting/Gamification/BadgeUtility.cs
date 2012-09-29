@@ -5,7 +5,7 @@ using System.Text;
 using System.IO;
 using System.Xml;
 
-namespace Gamification
+namespace Tridion.Extensions.Reporting.Gamification
 {
     public class BadgeUtility
     {
