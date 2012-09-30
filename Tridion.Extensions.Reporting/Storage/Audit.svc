@@ -1,1 +1,1 @@
-﻿<%@ ServiceHost Language="C#" Debug="true" Service="Tridion.Extensions.Auditing.AuditEvent" CodeBehind="Audit.svc.cs" %>
+﻿<%@ ServiceHost Language="C#" Debug="true" Service="Tridion.Extensions.Reporting.Storage.AuditEvent" CodeBehind="Audit.svc.cs" %>

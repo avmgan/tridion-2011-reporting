@@ -50,8 +50,11 @@ namespace Tridion.Extensions.Reporting.EventSystem
                 XmlNode defaultLogInfoNode = _config.SelectSingleNode("/Configuration/LogInfoObject/add[@default = 'true']");
                 if (defaultLogInfoNode != null)
                 {
+                    if (defaultLogInfoNode.Attributes["assembly"] == null) return;
+                    if (defaultLogInfoNode.Attributes["class"] == null) return;
+
                     _defaultLogInfoAssemblyLocation = defaultLogInfoNode.Attributes["assembly"].Value.ToLower();
-                    _defaultLogInfoTypeName = defaultLogInfoNode["class"].Value.ToLower();
+                    _defaultLogInfoTypeName = defaultLogInfoNode.Attributes["class"].Value;
                 }
             }
 
@@ -118,7 +121,7 @@ namespace Tridion.Extensions.Reporting.EventSystem
             if (logInfoObject != null)
             {
                 logInfoAssemblyLocation = logInfoObject.Attributes["assembly"].Value.ToLower();
-                logInfoTypeName = logInfoObject.Attributes["class"].Value.ToLower();
+                logInfoTypeName = logInfoObject.Attributes["class"].Value;
             } else
             {
                 logInfoAssemblyLocation = _defaultLogInfoAssemblyLocation;
@@ -149,18 +152,17 @@ namespace Tridion.Extensions.Reporting.EventSystem
                     _client.Close();
                 else
                     _client.Abort();
-
-                if (_auditServiceUrl.Equals(string.Empty)) return;
-
-                if (_binding == null || _endpoint == null)
-                {
-                    _binding = new BasicHttpBinding(BasicHttpSecurityMode.None);
-                    _endpoint = new EndpointAddress(_auditServiceUrl);
-                    _client = new AuditClient(_binding, _endpoint);
-                    //_client = new AuditClient();
-                    _client.Open();
-                }
             }
+
+            if (_auditServiceUrl.Equals(string.Empty)) return;
+            
+            _binding = new BasicHttpBinding(BasicHttpSecurityMode.None);
+            _endpoint = new EndpointAddress(_auditServiceUrl);
+            _client = new AuditClient(_binding, _endpoint);
+            //_client = new AuditClient();
+            _client.Open();
+
+            _client.WriteEvent(auditData);
         }
 
         public void Dispose()
