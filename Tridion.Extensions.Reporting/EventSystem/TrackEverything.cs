@@ -19,11 +19,12 @@ namespace Tridion.Extensions.Reporting.EventSystem
         private const string CONFIG_XML_PATH = "\\config\\ReportingConfig.xml";
         private readonly XmlDocument _config = new XmlDocument();
         private bool _configLoaded = false;
+        private string _auditServiceUrl = string.Empty;
         private string _defaultLogInfoAssemblyLocation = string.Empty;
         private string _defaultLogInfoTypeName = string.Empty;
         private AuditClient _client;
-        //private BasicHttpBinding _binding;
-        //private EndpointAddress _endpoint;
+        private BasicHttpBinding _binding;
+        private EndpointAddress _endpoint;
 
         public TrackEverything()
         {
@@ -40,6 +41,12 @@ namespace Tridion.Extensions.Reporting.EventSystem
                 _config.Load(ConfigurationSettings.GetTcmHomeDirectory() + CONFIG_XML_PATH);
                 _configLoaded = true;
 
+                XmlNode auditServiceUrlNode = _config.SelectSingleNode("/Configuration/AuditServiceUrl");
+                if (auditServiceUrlNode != null)
+                {
+                    _auditServiceUrl = auditServiceUrlNode.InnerText;
+                }
+
                 XmlNode defaultLogInfoNode = _config.SelectSingleNode("/Configuration/LogInfoObject/add[@default = 'true']");
                 if (defaultLogInfoNode != null)
                 {
@@ -48,11 +55,11 @@ namespace Tridion.Extensions.Reporting.EventSystem
                 }
             }
 
+            if (_auditServiceUrl.Equals(string.Empty)) return;
             // Open client
-            //_binding = new BasicHttpBinding(BasicHttpSecurityMode.None);
-            //_endpoint = new EndpointAddress("http://localhost:49267/Audit.svc");
-            //_client = new AuditClient(_binding, _endpoint);
-            _client = new AuditClient();
+            _binding = new BasicHttpBinding(BasicHttpSecurityMode.None);
+            _endpoint = new EndpointAddress(_auditServiceUrl);
+            _client = new AuditClient(_binding, _endpoint);
         }
 
 
@@ -82,7 +89,7 @@ namespace Tridion.Extensions.Reporting.EventSystem
             string logInfoAssemblyLocation = string.Empty;
             string logInfoTypeName = string.Empty;
 
-            if (!_configLoaded) return;
+            if (!_configLoaded || _auditServiceUrl.Equals(string.Empty)) return;
 
             string xpath = string.Format("/Configuration/Events/Event[@Type='{0}']", eventName);
 
@@ -143,9 +150,16 @@ namespace Tridion.Extensions.Reporting.EventSystem
                 else
                     _client.Abort();
 
-                //_client = new AuditClient(_binding, _endpoint);
-                _client = new AuditClient();
-                _client.Open();
+                if (_auditServiceUrl.Equals(string.Empty)) return;
+
+                if (_binding == null || _endpoint == null)
+                {
+                    _binding = new BasicHttpBinding(BasicHttpSecurityMode.None);
+                    _endpoint = new EndpointAddress(_auditServiceUrl);
+                    _client = new AuditClient(_binding, _endpoint);
+                    //_client = new AuditClient();
+                    _client.Open();
+                }
             }
         }
 
