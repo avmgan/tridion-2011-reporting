@@ -1,5 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <Configuration>
+  <AuditServiceUrl>http://localhost/webui/models/auditservice/audit.svc</AuditServiceUrl>
   <MongoDbUrl>mongodb://localhost/?safe=true</MongoDbUrl>
   <!-- If an event is not listed, then it will be logged -->
   <!-- If you want to disable an event, just insert it here as below, with the "Enabled" Attribute set to "false" -->
@@ -20,6 +21,7 @@
     <Event Type="GetInstanceDataEventArgs" Enabled="true"/>
   </Events>
   <LogInfoObject>
-    <add assembly="N:\Development\Gamification\TrackEverythingEventSystem\Logging\bin\Debug\Logging.dll" class="Logging.ExtendedLogInfo" subjectType="Publication" default="true" />
+    <add assembly="N:\Development\Tridion.Extensions.Reporting\Logging\bin\Debug\Tridion.Extensions.Reporting.Logging.dll" class="Logging.BaseLogInfo" default="true" />
+    <add assembly="N:\Development\Tridion.Extensions.Reporting\Logging\bin\Debug\Tridion.Extensions.Reporting.Logging.dll" class="Logging.ExtendedLogInfo" subjectType="Publication" />
   </LogInfoObject>
 </Configuration>
