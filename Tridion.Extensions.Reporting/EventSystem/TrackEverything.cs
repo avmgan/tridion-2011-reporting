@@ -1,10 +1,18 @@
-﻿using System;
+﻿/***************************************************************************************
+ * TODO: Add info here :)
+ * 
+ * 
+ * 
+ * 
+ * 
+ ***************************************************************************************/
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.ServiceModel;
 using System.Xml;
-
 using Tridion.ContentManager;
 using Tridion.ContentManager.ContentManagement;
 using Tridion.ContentManager.Extensibility;
@@ -16,7 +24,7 @@ namespace Tridion.Extensions.Reporting.EventSystem
     public class TrackEverything : TcmExtension, IDisposable
     {
         private readonly List<EventSubscription> _subscriptions = new List<EventSubscription>();
-        private const string CONFIG_XML_PATH = "\\config\\ReportingConfig.xml";
+        private const string ConfigXmlPath = "\\config\\ReportingConfig.xml";
         private readonly XmlDocument _config = new XmlDocument();
         private bool _configLoaded = false;
         private string _auditServiceUrl = string.Empty;
@@ -36,9 +44,9 @@ namespace Tridion.Extensions.Reporting.EventSystem
             _subscriptions.Add(EventSystem.Subscribe<IdentifiableObject, TcmEventArgs>(LogStart, EventPhases.Initiated));
             _subscriptions.Add(EventSystem.SubscribeAsync<IdentifiableObject, TcmEventArgs>(CollectEvent, EventPhases.TransactionCommitted | EventPhases.TransactionAborted | EventPhases.TransactionInDoubt));
 
-            if (File.Exists(ConfigurationSettings.GetTcmHomeDirectory() + CONFIG_XML_PATH))
+            if (File.Exists(ConfigurationSettings.GetTcmHomeDirectory() + ConfigXmlPath))
             {
-                _config.Load(ConfigurationSettings.GetTcmHomeDirectory() + CONFIG_XML_PATH);
+                _config.Load(ConfigurationSettings.GetTcmHomeDirectory() + ConfigXmlPath);
                 _configLoaded = true;
 
                 XmlNode auditServiceUrlNode = _config.SelectSingleNode("/Configuration/AuditServiceUrl");
@@ -144,6 +152,8 @@ namespace Tridion.Extensions.Reporting.EventSystem
 
         private void StoreAuditData(object auditData)
         {
+            // Nuno, October 26
+            // Must account for CommunicationState.Opening too.
             if (_client.State == CommunicationState.Opened)
                 _client.WriteEvent(auditData);
             if (_client.State != CommunicationState.Opened)
