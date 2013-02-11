@@ -20,8 +20,4 @@
     <Event Type="DeleteOrganizationalItemEventArgs" Enabled="true" />
     <Event Type="GetInstanceDataEventArgs" Enabled="true"/>
   </Events>
-  <LogInfoObject>
-    <add assembly="N:\Development\Tridion.Extensions.Reporting\Logging\bin\Debug\Tridion.Extensions.Reporting.Logging.dll" class="Tridion.Extensions.Reporting.Logging.BaseLogInfo" default="true" />
-    <add assembly="N:\Development\Tridion.Extensions.Reporting\Logging\bin\Debug\Tridion.Extensions.Reporting.Logging.dll" class="Tridion.Extensions.Reporting.Logging.ExtendedLogInfo" subjectType="Publication" />
-  </LogInfoObject>
 </Configuration>
