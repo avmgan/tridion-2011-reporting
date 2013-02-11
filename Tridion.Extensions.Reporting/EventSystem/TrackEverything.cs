@@ -1,178 +1,94 @@
-﻿/***************************************************************************************
- * TODO: Add info here :)
- * 
- * 
- * 
- * 
- * 
- ***************************************************************************************/
-
+﻿using MongoDB.Bson;
+using MongoDB.Driver;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
-using System.ServiceModel;
+using System.Threading;
 using System.Xml;
 using Tridion.ContentManager;
-using Tridion.ContentManager.ContentManagement;
 using Tridion.ContentManager.Extensibility;
-using Tridion.ContentManager.Extensibility.Events;
 
 namespace Tridion.Extensions.Reporting.EventSystem
 {
-    [TcmExtension("TrackEverythingEvents")]
-    public class TrackEverything : TcmExtension, IDisposable
+    [TcmExtension("Track All Events")]
+    public class TrackEvents : TcmExtension, IDisposable
     {
         private readonly List<EventSubscription> _subscriptions = new List<EventSubscription>();
+        private bool _configLoaded;
         private const string ConfigXmlPath = "\\config\\ReportingConfig.xml";
-        private readonly XmlDocument _config = new XmlDocument();
-        private bool _configLoaded = false;
-        private string _auditServiceUrl = string.Empty;
-        private string _defaultLogInfoAssemblyLocation = string.Empty;
-        private string _defaultLogInfoTypeName = string.Empty;
-        private AuditClient _client;
-        private BasicHttpBinding _binding;
-        private EndpointAddress _endpoint;
+        private XmlDocument _config;
+        private MongoServer _server;
+        private MongoDatabase _database;
+        private const string MongoConnectionString = "mongodb://localhost/?safe=true";
 
-        public TrackEverything()
+        public TrackEvents()
         {
-            RegisterConfiguredEvents();
+            RegisterEvents();
         }
 
-        private void RegisterConfiguredEvents()
+        private void RegisterEvents()
         {
             _subscriptions.Add(EventSystem.Subscribe<IdentifiableObject, TcmEventArgs>(LogStart, EventPhases.Initiated));
-            _subscriptions.Add(EventSystem.SubscribeAsync<IdentifiableObject, TcmEventArgs>(CollectEvent, EventPhases.TransactionCommitted | EventPhases.TransactionAborted | EventPhases.TransactionInDoubt));
+            _subscriptions.Add(EventSystem.SubscribeAsync<IdentifiableObject, TcmEventArgs>(LogEvent, EventPhases.TransactionCommitted | EventPhases.TransactionAborted | EventPhases.TransactionInDoubt));
 
             if (File.Exists(ConfigurationSettings.GetTcmHomeDirectory() + ConfigXmlPath))
             {
+                _config = new XmlDocument();
                 _config.Load(ConfigurationSettings.GetTcmHomeDirectory() + ConfigXmlPath);
                 _configLoaded = true;
-
-                XmlNode auditServiceUrlNode = _config.SelectSingleNode("/Configuration/AuditServiceUrl");
-                if (auditServiceUrlNode != null)
-                {
-                    _auditServiceUrl = auditServiceUrlNode.InnerText;
-                }
-
-                XmlNode defaultLogInfoNode = _config.SelectSingleNode("/Configuration/LogInfoObject/add[@default = 'true']");
-                if (defaultLogInfoNode != null)
-                {
-                    if (defaultLogInfoNode.Attributes["assembly"] == null) return;
-                    if (defaultLogInfoNode.Attributes["class"] == null) return;
-
-                    _defaultLogInfoAssemblyLocation = defaultLogInfoNode.Attributes["assembly"].Value.ToLower();
-                    _defaultLogInfoTypeName = defaultLogInfoNode.Attributes["class"].Value;
-                }
-            }
-
-            if (_auditServiceUrl.Equals(string.Empty)) return;
-            // Open client
-            _binding = new BasicHttpBinding(BasicHttpSecurityMode.None);
-            _endpoint = new EndpointAddress(_auditServiceUrl);
-            _client = new AuditClient(_binding, _endpoint);
-        }
-
-
-        private void SetDefaultValues(OrganizationalItem subject, LoadEventArgs args, EventPhases phase)
-        {
-            if (subject.Id.IsUriNull) //Is new
-            {
-                OrganizationalItem parent = subject.OrganizationalItem;
-                if (parent.MetadataSchema != null && subject.MetadataSchema == null)
-                {
-                    subject.MetadataSchema = parent.MetadataSchema;
-                    subject.Metadata = parent.Metadata;
-                }
+                
+                _server = MongoServer.Create(MongoConnectionString);
+                _database = _server.GetDatabase("TridionEvents");
             }
         }
 
-        private void LogStart(IdentifiableObject subject, TcmEventArgs tcmEventArgs, EventPhases phase)
+        private static void LogStart(IdentifiableObject subject, TcmEventArgs tcmEventArgs, EventPhases phase)
         {
             if (tcmEventArgs.ContextVariables.ContainsKey("InitiatedTicks")) return;
             tcmEventArgs.ContextVariables.Add("InitiatedTicks", DateTime.Now.Ticks);
         }
 
-        private void CollectEvent(IdentifiableObject subject, TcmEventArgs tcmEventArgs, EventPhases phase)
+        private void LogEvent(IdentifiableObject subject, TcmEventArgs tcmEventArgs, EventPhases phase)
         {
-
             string eventName = tcmEventArgs.GetType().Name;
-            string logInfoAssemblyLocation = string.Empty;
-            string logInfoTypeName = string.Empty;
-
-            if (!_configLoaded || _auditServiceUrl.Equals(string.Empty)) return;
-
+            if(!_configLoaded) return;
             string xpath = string.Format("/Configuration/Events/Event[@Type='{0}']", eventName);
-
             bool skipSystemUsers =
-                Convert.ToBoolean(
-                    _config.SelectSingleNode("/Configuration/Events").Attributes["SkipSystemUsers"].Value);
+                Convert.ToBoolean(_config.SelectSingleNode("/Configuration/Events").Attributes["SkipSystemUsers"].Value);
             if (skipSystemUsers && subject.Session.User.IsPredefined) return;
-
-            if (subject.GetType().Name == "User" && (eventName == "LoadEventArgs" || eventName == "LoadAppDataEventArgs"))
+            
+            if(subject.GetType().Name == "User" && (eventName == "LoadEventArgs" || eventName == "LoadAppDataEventArgs"))
             {
                 bool skipLoadingProfile =
                     Convert.ToBoolean(
                         _config.SelectSingleNode("/Configuration/Events").Attributes["SkipLoadingUserProfile"].Value);
-                if (skipLoadingProfile) return;
+                if(skipLoadingProfile) return;
             }
-            // Only log configured events
-
-            // Log by default if node doesn't exist
-            //if (config.SelectSingleNode(xpath) == null) return;
-            if (_config.SelectSingleNode(xpath) != null)
+            if(_config.SelectSingleNode(xpath) != null)
                 if (_config.SelectSingleNode(xpath).Attributes["Enabled"].Value.ToLower() == "false") return;
 
-            XmlNode logInfoObject =
-                _config.SelectSingleNode("/Configuration/LogInfoObject/add[@subjectType = '" + subject.GetType().Name +
-                                        "']");
-            if (logInfoObject != null)
-            {
-                logInfoAssemblyLocation = logInfoObject.Attributes["assembly"].Value.ToLower();
-                logInfoTypeName = logInfoObject.Attributes["class"].Value;
-            } else
-            {
-                logInfoAssemblyLocation = _defaultLogInfoAssemblyLocation;
-                logInfoTypeName = _defaultLogInfoTypeName;
-            }
-
             long startTime = Convert.ToInt64(tcmEventArgs.ContextVariables["InitiatedTicks"]);
-
-            var logInfo = new object();
-
-            if (logInfoAssemblyLocation.Equals(string.Empty) || logInfoTypeName.Equals(string.Empty)) return;
-
-            Assembly logInfoAssembly = Assembly.LoadFile(logInfoAssemblyLocation);
-            Type logInfoType = logInfoAssembly.GetType(logInfoTypeName);
-            logInfo = Activator.CreateInstance(logInfoType, new object[] { startTime, subject, tcmEventArgs, phase });
-
-            StoreAuditData(logInfo);
-
-        }
-
-        private void StoreAuditData(object auditData)
-        {
-            // Nuno, October 26
-            // Must account for CommunicationState.Opening too.
-            if (_client.State == CommunicationState.Opened)
-                _client.WriteEvent(auditData);
-            if (_client.State != CommunicationState.Opened)
-            {
-                if (_client.State != CommunicationState.Faulted)
-                    _client.Close();
-                else
-                    _client.Abort();
-            }
-
-            if (_auditServiceUrl.Equals(string.Empty)) return;
+            var collection = _database.GetCollection<BsonDocument>("events");
+            TimeSpan ellapsed = new TimeSpan(DateTime.Now.Ticks - startTime);
+            BsonDocument tridionEvent = new BsonDocument
+                                                {
+                                                    {"_id", ObjectId.GenerateNewId()},
+                                                    {"EventName", tcmEventArgs.GetType().Name.Replace("EventArgs", "")},
+                                                    {"EventFamily", tcmEventArgs.GetType().BaseType.Name.Replace("EventArgs", "")},
+                                                    {"EventPhase", phase.ToString()},
+                                                    {"EventStartDate", DateTime.Now},
+                                                    {"SubjectId", subject.Id.ToString()},
+                                                    {"SubjectName", subject.Title},
+                                                    {"SubjectType", subject.GetType().Name},
+                                                    {"UserId", subject.Session.User.Id.ToString()},
+                                                    {"UserName", subject.Session.User.Title},
+                                                    {"ServerName", Environment.MachineName},
+                                                    {"EllapsedMilliseconds", ellapsed.Milliseconds},
+                                                    {"EventThreadId", Thread.CurrentThread.ManagedThreadId}
+                                                };
+            collection.Insert(tridionEvent);
             
-            _binding = new BasicHttpBinding(BasicHttpSecurityMode.None);
-            _endpoint = new EndpointAddress(_auditServiceUrl);
-            _client = new AuditClient(_binding, _endpoint);
-            //_client = new AuditClient();
-            _client.Open();
 
-            _client.WriteEvent(auditData);
         }
 
         public void Dispose()
@@ -181,6 +97,8 @@ namespace Tridion.Extensions.Reporting.EventSystem
             {
                 eventSubscription.Unsubscribe();
             }
+            _server.Disconnect();
         }
     }
+
 }
