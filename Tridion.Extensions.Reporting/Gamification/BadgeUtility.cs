@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Xml;
 
 namespace Tridion.Extensions.Reporting.Gamification
@@ -40,7 +38,7 @@ namespace Tridion.Extensions.Reporting.Gamification
         /// <param name="tridionUser">The tridion user.</param>
         public static void CheckAllBadges(TridionEvent tridionevent, TridionUser tridionUser)
         {
-            List<Badge> badges = BadgeUtility.GetAllBadges().Where(r => r.EventPhase == tridionevent.EventPhase).ToList();
+            List<Badge> badges = GetAllBadges().Where(r => r.EventPhase == tridionevent.EventPhase).ToList();
             CheckEqualsOperator(badges, tridionUser);
         }
 

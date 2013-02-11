@@ -8,7 +8,7 @@
     <ProjectGuid>{2823FE91-9A29-402D-8E15-B8BB0F5EC39C}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Gamification</RootNamespace>
+    <RootNamespace>Tridion.Extensions.Reporting.Gamification</RootNamespace>
     <AssemblyName>Gamification</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
